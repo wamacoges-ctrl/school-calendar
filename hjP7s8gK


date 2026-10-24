@@ -1,0 +1,2077 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>イベント共有カレンダー</title>
+
+<!-- Tailwind CSS -->
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- FontAwesome Icons -->
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- Google Fonts Inter -->
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+body {
+
+font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+-webkit-tap-highlight-color: transparent;
+
+}
+
+/* Custom smooth scrollbar */
+
+::-webkit-scrollbar {
+
+width: 4px;
+
+height: 4px;
+
+}
+
+::-webkit-scrollbar-track {
+
+background: #f1f5f9;
+
+}
+
+::-webkit-scrollbar-thumb {
+
+background: #cbd5e1;
+
+border-radius: 4px;
+
+}
+
+::-webkit-scrollbar-thumb:hover {
+
+background: #94a3b8;
+
+}
+
+/* Touch safety padding for bottom navigation/safari bar */
+
+.pb-safe {
+
+padding-bottom: env(safe-area-inset-bottom, 1rem);
+
+}
+
+</style>
+
+</head>
+
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+
+<!-- Header -->
+
+<header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+
+<div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
+
+<!-- App Logo / Title -->
+
+<div class="flex items-center space-x-2.5">
+
+<div class="bg-indigo-600 text-white p-2 rounded-xl flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 shadow-md shadow-indigo-100 flex-shrink-0">
+
+<i class="fa-solid font-bold fa-calendar-days text-lg sm:text-xl"></i>
+
+</div>
+
+<div id="calendar-title-container" class="group flex items-center space-x-1.5 cursor-pointer rounded-lg p-1 hover:bg-slate-50 transition-colors">
+
+<div>
+
+<div class="flex items-center space-x-1">
+
+<h1 id="app-title-display" class="text-base sm:text-xl font-bold text-slate-900 leading-tight">イベント共有カレンダー</h1>
+
+<i id="edit-title-icon" class="fa-solid fa-pen-to-square text-xs text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity hidden"></i>
+
+</div>
+
+<p class="text-[10px] sm:text-xs text-slate-500 hidden sm:block">重要イベントを共有・チェック</p>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Header Action Buttons -->
+
+<div class="flex items-center space-x-1.5 sm:space-x-3">
+
+<!-- Notification Permission Button -->
+
+<button id="notify-toggle-btn" class="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl font-semibold text-xs flex items-center space-x-1 transition-all shadow-2xs active:scale-95">
+
+<i id="notify-icon" class="fa-solid fa-bell text-xs"></i>
+
+<span id="notify-text" class="text-[11px] sm:text-xs">通知</span>
+
+</button>
+
+
+<!-- iOS / Mobile App Setup Guide Button -->
+
+<button id="pwa-guide-btn" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl font-medium text-xs flex items-center space-x-1 transition-colors active:scale-95" title="スマホで通知を受け取る設定">
+
+<i class="fa-solid fa-mobile-screen-button text-indigo-600 text-xs"></i>
+
+<span class="hidden md:inline">スマホ通知設定</span>
+
+</button>
+
+
+<!-- Share Button -->
+
+<button id="share-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl font-medium text-xs flex items-center space-x-1 transition-colors active:scale-95" title="カレンダー共有URLをコピー">
+
+<i class="fa-solid fa-share-nodes text-indigo-600 text-xs"></i>
+
+<span class="hidden md:inline">共有</span>
+
+</button>
+
+
+<!-- Admin Mode Toggle Button -->
+
+<button id="admin-toggle-btn" class="bg-slate-800 hover:bg-slate-900 text-white px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl font-medium text-xs flex items-center space-x-1 transition-colors shadow-2xs active:scale-95">
+
+<i id="admin-status-icon" class="fa-solid fa-lock text-[10px] text-amber-400"></i>
+
+<span id="admin-status-text" class="text-[11px] sm:text-xs">管理者</span>
+
+</button>
+
+
+<!-- Add Event Button (Admin Only) -->
+
+<button id="add-event-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-semibold text-xs flex items-center space-x-1.5 transition-all shadow-xs active:scale-95 hidden">
+
+<i class="fa-solid fa-plus text-xs"></i>
+
+<span class="hidden sm:inline">追加</span>
+
+</button>
+
+</div>
+
+</div>
+
+</header>
+
+
+<!-- Main Content Layout -->
+
+<main class="flex-1 max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-3 sm:py-6 flex flex-col lg:flex-row gap-4 sm:gap-6">
+
+<!-- Left Column: Calendar View Card -->
+
+<section class="flex-1 bg-white rounded-2xl border border-slate-200 shadow-xs p-3 sm:p-6 flex flex-col">
+
+<!-- Calendar Navigation & Controls Header -->
+
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 sm:mb-6">
+
+<!-- Month Navigator -->
+
+<div class="flex items-center justify-between sm:justify-start space-x-2">
+
+<h2 id="current-month-display" class="text-lg sm:text-2xl font-bold text-slate-800 tracking-tight">
+
+2026年 10月
+
+</h2>
+
+<div class="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl">
+
+<button id="prev-month-btn" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-2xs active:bg-slate-200 transition-all">
+
+<i class="fa-solid fa-chevron-left text-xs"></i>
+
+</button>
+
+<button id="today-btn" class="px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-white hover:shadow-2xs active:bg-slate-200 rounded-lg transition-all">
+
+今日
+
+</button>
+
+<button id="next-month-btn" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-2xs active:bg-slate-200 transition-all">
+
+<i class="fa-solid fa-chevron-right text-xs"></i>
+
+</button>
+
+</div>
+
+</div>
+
+
+<!-- Category Filter Dropdown -->
+
+<div class="flex items-center space-x-2 w-full sm:w-auto">
+
+<span class="text-xs font-semibold text-slate-400 uppercase tracking-wider hidden lg:inline">絞り込み:</span>
+
+<select id="category-filter" class="w-full sm:w-auto bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs">
+
+<option value="all">すべてのカテゴリ</option>
+
+<option value="school">🏫 学校・仕事</option>
+
+<option value="event">🎉 イベント・お祭り</option>
+
+<option value="private">🏠 プライベート</option>
+
+<option value="anniversary">🎂 記念日・行事</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+<!-- Calendar Days Header (Sunday to Saturday) -->
+
+<div class="grid grid-cols-7 text-center font-bold text-[11px] sm:text-xs text-slate-400 mb-1 sm:mb-2">
+
+<div class="text-rose-500 py-1">日</div>
+
+<div class="py-1">月</div>
+
+<div class="py-1">火</div>
+
+<div class="py-1">水</div>
+
+<div class="py-1">木</div>
+
+<div class="py-1">金</div>
+
+<div class="text-sky-500 py-1">土</div>
+
+</div>
+
+
+<!-- Calendar Days Grid -->
+
+<div id="calendar-grid" class="grid grid-cols-7 gap-1 sm:gap-2 flex-1 auto-rows-fr">
+
+<!-- Dynamic calendar cells generated via JS -->
+
+</div>
+
+</section>
+
+
+<!-- Right Column: Event Sidebar & Reminders -->
+
+<aside class="w-full lg:w-80 xl:w-96 flex flex-col gap-4 sm:gap-6 pb-20 sm:pb-safe">
+
+
+<!-- Mobile Notification Setup Alert Banner -->
+
+<div id="mobile-notice-banner" class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-3.5 shadow-md flex items-center justify-between sm:hidden">
+
+<div class="flex items-center space-x-2.5">
+
+<div class="bg-white/20 p-2 rounded-xl">
+
+<i class="fa-solid fa-mobile-screen text-base"></i>
+
+</div>
+
+<div>
+
+<p class="text-xs font-bold">iPhone / Androidで通知を受ける</p>
+
+<p class="text-[10px] text-indigo-100">ホーム画面に追加してアプリのように使えます</p>
+
+</div>
+
+</div>
+
+<button id="open-pwa-guide-from-banner" class="bg-white text-indigo-700 px-2.5 py-1 rounded-lg text-[11px] font-bold shadow-2xs whitespace-nowrap">
+
+設定手順
+
+</button>
+
+</div>
+
+
+<!-- Reminder Card (Upcoming 7 days) -->
+
+<div class="bg-amber-50/90 border border-amber-200 rounded-2xl p-3.5 sm:p-4 shadow-2xs">
+
+<div class="flex items-center justify-between mb-2">
+
+<h3 class="text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+
+<i class="fa-solid fa-triangle-exclamation text-amber-500"></i> 近日中のリマインダー (7日以内)
+
+</h3>
+
+<span id="upcoming-count" class="bg-amber-200 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-full">0件</span>
+
+</div>
+
+<div id="upcoming-reminder-list" class="space-y-1.5 max-h-36 overflow-y-auto pr-0.5 text-xs">
+
+<!-- Dynamic reminder items -->
+
+</div>
+
+</div>
+
+<!-- Selected Date / Monthly Events Banner -->
+
+<div class="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 sm:p-5 flex flex-col flex-1">
+
+<div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+
+<div>
+
+<h3 id="sidebar-title" class="font-bold text-slate-800 text-sm sm:text-base">今月の行事予定</h3>
+
+<p id="sidebar-subtitle" class="text-xs text-slate-500">登録されているイベント一覧</p>
+
+</div>
+
+<button id="clear-selected-date" class="text-xs bg-indigo-50 text-indigo-600 hover:bg-indigo-100 px-2.5 py-1 rounded-lg font-semibold transition-colors hidden">
+
+全体を表示
+
+</button>
+
+</div>
+
+
+<!-- Event List Items -->
+
+<div id="event-list" class="space-y-2.5 overflow-y-auto max-h-72 lg:max-h-[450px] pr-0.5 flex-1">
+
+<!-- Dynamic event cards -->
+
+</div>
+
+</div>
+
+</aside>
+
+</main>
+
+
+<!-- Floating Action Add Event Button for Mobile Admin Mode -->
+
+<button id="mobile-add-fab" class="fixed bottom-6 right-5 bg-indigo-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-xl sm:hidden active:scale-95 transition-all z-20 hidden" title="新規行事を追加">
+
+<i class="fa-solid fa-plus"></i>
+
+</button>
+
+
+<!-- Modal: Smartphone Notification Guide Modal -->
+
+<div id="pwa-guide-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+
+<div class="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 transform transition-all max-h-[90vh] overflow-y-auto">
+
+<div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+
+<h3 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+
+<i class="fa-solid fa-bell text-indigo-600"></i> スマホで通知を受け取る方法
+
+</h3>
+
+<button id="close-pwa-modal-btn" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100">
+
+<i class="fa-solid fa-xmark text-lg"></i>
+
+</button>
+
+</div>
+
+
+<div class="space-y-4 text-xs sm:text-sm text-slate-600">
+
+<div class="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl">
+
+<div class="flex items-center space-x-2 font-bold text-slate-800 mb-2">
+
+<i class="fa-brands fa-apple text-base text-slate-900"></i>
+
+<span>iPhone / iPad (iOS 16.4以上)</span>
+
+</div>
+
+<ol class="list-decimal list-inside space-y-1.5 text-slate-600 text-xs">
+
+<li>Safariの画面下部にある **「共有ボタン (<i class="fa-solid fa-arrow-up-from-bracket"></i>)」** をタップ</li>
+
+<li>メニューから **「ホーム画面に追加 (<i class="fa-regular fa-square-plus"></i>)」** を選択</li>
+
+<li>ホーム画面からアプリを起動し、ヘッダーの **「通知」** ボタンをタップして許可</li>
+
+</ol>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- Modal: Edit Title Modal -->
+
+<div id="title-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+
+<div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-5 transform transition-all">
+
+<div class="flex items-center justify-between pb-2 border-b border-slate-100 mb-3">
+
+<h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+
+<i class="fa-solid fa-pen text-indigo-600"></i> カレンダー名を変更
+
+</h3>
+
+<button id="close-title-modal-btn" class="text-slate-400 hover:text-slate-600 w-7 h-7 rounded-full flex items-center justify-center hover:bg-slate-100">
+
+<i class="fa-solid fa-xmark text-lg"></i>
+
+</button>
+
+</div>
+
+
+<form id="title-form" class="space-y-3">
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-600 mb-1" for="calendar-title-input">タイトル名</label>
+
+<input type="text" id="calendar-title-input" required placeholder="例: 〇〇学校 行事カレンダー" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+</div>
+
+
+<div class="flex items-center justify-end space-x-2 pt-1">
+
+<button type="button" id="cancel-title-btn" class="px-3 py-1.5 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-50">キャンセル</button>
+
+<button type="submit" class="px-4 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 shadow-xs">保存</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+
+<!-- Modal: Add / Edit Event Modal -->
+
+<div id="event-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+
+<div class="bg-white rounded-t-3xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 transform transition-all max-h-[90vh] overflow-y-auto">
+
+<div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+
+<h3 id="modal-title" class="text-base sm:text-lg font-bold text-slate-800">行事を追加</h3>
+
+<button id="close-modal-btn" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100">
+
+<i class="fa-solid fa-xmark text-lg"></i>
+
+</button>
+
+</div>
+
+
+<form id="event-form" class="space-y-3.5">
+
+<input type="hidden" id="event-id">
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-600 mb-1" for="event-title">行事名 <span class="text-rose-500">*</span></label>
+
+<input type="text" id="event-title" required placeholder="例: 運動会、夏祭り、会議など" class="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+</div>
+
+
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-600 mb-1" for="event-date">日付 <span class="text-rose-500">*</span></label>
+
+<input type="date" id="event-date" required class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+</div>
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-600 mb-1" for="event-category">カテゴリ</label>
+
+<select id="event-category" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+
+<option value="school">🏫 学校・仕事</option>
+
+<option value="event">🎉 イベント・お祭り</option>
+
+<option value="private">🏠 プライベート</option>
+
+<option value="anniversary">🎂 記念日・行事</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-600 mb-1" for="event-time">時間（任意）</label>
+
+<input type="time" id="event-time" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+</div>
+
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-600 mb-1" for="event-memo">メモ・詳細</label>
+
+<textarea id="event-memo" rows="3" placeholder="持ち物、場所、詳細など..." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+
+</div>
+
+
+<div class="flex items-center justify-between pt-3 border-t border-slate-100">
+
+<button type="button" id="delete-event-btn" class="text-rose-500 hover:text-rose-700 font-semibold text-xs py-2 px-3 rounded-lg hover:bg-rose-50 hidden">
+
+<i class="fa-solid fa-trash mr-1"></i> 削除
+
+</button>
+
+<div class="flex items-center space-x-2 ml-auto">
+
+<button type="button" id="cancel-modal-btn" class="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-50">キャンセル</button>
+
+<button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 shadow-xs">保存する</button>
+
+</div>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+
+<!-- Modal: Delete Confirmation Modal -->
+
+<div id="delete-confirm-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+
+<div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-5 text-center transform transition-all">
+
+<div class="w-11 h-11 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-3">
+
+<i class="fa-solid fa-triangle-exclamation text-lg"></i>
+
+</div>
+
+<h3 class="text-sm font-bold text-slate-800 mb-1">行事を削除しますか？</h3>
+
+<p class="text-xs text-slate-500 mb-4">この操作は取り消せません。</p>
+
+<div class="flex items-center space-x-2">
+
+<button type="button" id="cancel-delete-btn" class="flex-1 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-50">キャンセル</button>
+
+<button type="button" id="confirm-delete-btn" class="flex-1 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold hover:bg-rose-700 shadow-xs">削除する</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- Modal: Admin Passcode Modal -->
+
+<div id="admin-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+
+<div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-5 transform transition-all">
+
+<div class="flex items-center justify-between pb-2 border-b border-slate-100 mb-3">
+
+<h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+
+<i class="fa-solid fa-user-shield text-indigo-600"></i> 管理者ログイン
+
+</h3>
+
+<button id="close-admin-modal-btn" class="text-slate-400 hover:text-slate-600 w-7 h-7 rounded-full flex items-center justify-center hover:bg-slate-100">
+
+<i class="fa-solid fa-xmark text-lg"></i>
+
+</button>
+
+</div>
+
+
+<p class="text-xs text-slate-500 mb-3">
+
+行事の追加・編集を行うパスコードを入力してください。
+
+</p>
+
+
+<form id="admin-form" class="space-y-3">
+
+<div>
+
+<label class="block text-xs font-semibold text-slate-600 mb-1" for="admin-passcode">パスコード</label>
+
+<input type="password" id="admin-passcode" required placeholder="パスコード" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+<p id="admin-error-msg" class="text-xs text-rose-500 mt-1 hidden">パスコードが違います。</p>
+
+</div>
+
+
+<div class="flex items-center justify-end space-x-2 pt-1">
+
+<button type="button" id="cancel-admin-btn" class="px-3 py-1.5 border border-slate-200 text-slate-600 rounded-xl text-xs font-semibold hover:bg-slate-50">キャンセル</button>
+
+<button type="submit" class="px-4 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 shadow-xs">ログイン</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+
+<!-- Notification Toast Message -->
+
+<div id="toast" class="fixed bottom-5 right-4 left-4 sm:left-auto sm:right-5 max-w-sm bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg text-xs sm:text-sm flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all z-50 pointer-events-none">
+
+<i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-base flex-shrink-0"></i>
+
+<span id="toast-message">保存しました</span>
+
+</div>
+
+
+<!-- Firebase App Modules & Main Application Code -->
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+
+import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+import { getFirestore, collection, onSnapshot, addDoc, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+
+// Global Firebase configuration
+
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-event-calendar';
+
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+
+let db = null;
+
+let auth = null;
+
+let user = null;
+
+
+// Event Category styling and config
+
+const CATEGORIES = {
+
+school: { name: '学校・仕事', icon: 'fa-school', bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200', dot: 'bg-blue-500' },
+
+event: { name: 'イベント', icon: 'fa-champagne-glasses', bg: 'bg-purple-100', text: 'text-purple-800', border: 'border-purple-200', dot: 'bg-purple-500' },
+
+private: { name: 'プライベート', icon: 'fa-house', bg: 'bg-emerald-100', text: 'text-emerald-800', border: 'border-emerald-200', dot: 'bg-emerald-500' },
+
+anniversary: { name: '記念日・行事', icon: 'fa-cake-candles', bg: 'bg-amber-100', text: 'text-amber-800', border: 'border-amber-200', dot: 'bg-amber-500' }
+
+};
+
+
+// Admin Security Passcode
+
+const ADMIN_PASSCODE = 'hjP7s8gK';
+
+
+// Core Application State
+
+let state = {
+
+currentDate: new Date(),
+
+selectedDate: null,
+
+filterCategory: 'all',
+
+isAdmin: false,
+
+calendarTitle: 'イベント共有カレンダー',
+
+events: []
+
+};
+
+
+// Key DOM Element references
+
+const calendarGrid = document.getElementById('calendar-grid');
+
+const currentMonthDisplay = document.getElementById('current-month-display');
+
+const prevMonthBtn = document.getElementById('prev-month-btn');
+
+const nextMonthBtn = document.getElementById('next-month-btn');
+
+const todayBtn = document.getElementById('today-btn');
+
+const categoryFilter = document.getElementById('category-filter');
+
+const eventList = document.getElementById('event-list');
+
+const sidebarTitle = document.getElementById('sidebar-title');
+
+const sidebarSubtitle = document.getElementById('sidebar-subtitle');
+
+const clearSelectedDateBtn = document.getElementById('clear-selected-date');
+
+const upcomingReminderList = document.getElementById('upcoming-reminder-list');
+
+const upcomingCount = document.getElementById('upcoming-count');
+
+
+// Title Elements
+
+const calendarTitleContainer = document.getElementById('calendar-title-container');
+
+const appTitleDisplay = document.getElementById('app-title-display');
+
+const editTitleIcon = document.getElementById('edit-title-icon');
+
+const titleModal = document.getElementById('title-modal');
+
+const titleForm = document.getElementById('title-form');
+
+const calendarTitleInput = document.getElementById('calendar-title-input');
+
+const closeTitleModalBtn = document.getElementById('close-title-modal-btn');
+
+const cancelTitleBtn = document.getElementById('cancel-title-btn');
+
+
+// Notification Elements
+
+const notifyToggleBtn = document.getElementById('notify-toggle-btn');
+
+const notifyIcon = document.getElementById('notify-icon');
+
+const notifyText = document.getElementById('notify-text');
+
+
+// Admin & Share Elements
+
+const adminToggleBtn = document.getElementById('admin-toggle-btn');
+
+const adminStatusIcon = document.getElementById('admin-status-icon');
+
+const adminStatusText = document.getElementById('admin-status-text');
+
+const shareBtn = document.getElementById('share-btn');
+
+const pwaGuideBtn = document.getElementById('pwa-guide-btn');
+
+const pwaGuideModal = document.getElementById('pwa-guide-modal');
+
+const closePwaModalBtn = document.getElementById('close-pwa-modal-btn');
+
+const openPwaGuideFromBanner = document.getElementById('open-pwa-guide-from-banner');
+
+const adminModal = document.getElementById('admin-modal');
+
+const adminForm = document.getElementById('admin-form');
+
+const adminPasscode = document.getElementById('admin-passcode');
+
+const adminErrorMsg = document.getElementById('admin-error-msg');
+
+const closeAdminModalBtn = document.getElementById('close-admin-modal-btn');
+
+const cancelAdminBtn = document.getElementById('cancel-admin-btn');
+
+
+// Event Modal Elements
+
+const eventModal = document.getElementById('event-modal');
+
+const addEventBtn = document.getElementById('add-event-btn');
+
+const mobileAddFab = document.getElementById('mobile-add-fab');
+
+const closeModalBtn = document.getElementById('close-modal-btn');
+
+const cancelModalBtn = document.getElementById('cancel-modal-btn');
+
+const eventForm = document.getElementById('event-form');
+
+const modalTitle = document.getElementById('modal-title');
+
+const deleteEventBtn = document.getElementById('delete-event-btn');
+
+
+// Delete Confirmation Modal Elements
+
+const deleteConfirmModal = document.getElementById('delete-confirm-modal');
+
+const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+
+const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+
+
+// Form Inputs
+
+const inputId = document.getElementById('event-id');
+
+const inputTitle = document.getElementById('event-title');
+
+const inputDate = document.getElementById('event-date');
+
+const inputTime = document.getElementById('event-time');
+
+const inputCategory = document.getElementById('event-category');
+
+const inputMemo = document.getElementById('event-memo');
+
+
+// Initialize application logic
+
+async function init() {
+
+setupEventListeners();
+
+updateNotificationUI();
+
+if (firebaseConfig) {
+
+try {
+
+const app = initializeApp(firebaseConfig);
+
+auth = getAuth(app);
+
+db = getFirestore(app);
+
+
+if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+
+const userCredential = await signInWithCustomToken(auth, __initial_auth_token);
+
+user = userCredential.user;
+
+} else {
+
+const userCredential = await signInAnonymously(auth);
+
+user = userCredential.user;
+
+}
+
+
+setupFirestoreSync();
+
+} catch (err) {
+
+console.error("Firebase Initialization Error:", err);
+
+loadLocalFallback();
+
+}
+
+} else {
+
+loadLocalFallback();
+
+}
+
+}
+
+
+function loadLocalFallback() {
+
+state.events = [
+
+{ id: '1', title: '秋の運動会 🏃‍♂️', date: getFormattedDate(0, 5), time: '09:00', category: 'school', memo: 'お弁当持参。水筒を忘れずに！' },
+
+{ id: '2', title: '地域のお祭り 🎃', date: getFormattedDate(0, 12), time: '14:00', category: 'event', memo: '中央公園にて開催。' }
+
+];
+
+renderAll();
+
+}
+
+
+// Realtime sync with Firestore
+
+function setupFirestoreSync() {
+
+if (!db || !user) return;
+
+
+const eventsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'events');
+
+onSnapshot(eventsCollection, (snapshot) => {
+
+state.events = snapshot.docs.map(doc => ({
+
+id: doc.id,
+
+...doc.data()
+
+}));
+
+renderAll();
+
+checkUpcomingNotifications();
+
+}, (error) => {
+
+console.error("Firestore Sync Error:", error);
+
+showToast("データ同期に失敗しました");
+
+});
+
+
+// Title Settings Sync
+
+const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'config');
+
+onSnapshot(settingsDoc, (docSnap) => {
+
+if (docSnap.exists() && docSnap.data().title) {
+
+state.calendarTitle = docSnap.data().title;
+
+appTitleDisplay.textContent = state.calendarTitle;
+
+document.title = state.calendarTitle;
+
+}
+
+}, (error) => {
+
+console.error("Settings Sync Error:", error);
+
+});
+
+}
+
+
+function renderAll() {
+
+appTitleDisplay.textContent = state.calendarTitle;
+
+renderCalendar();
+
+renderEventSidebar();
+
+renderReminders();
+
+}
+
+
+function getFormattedDate(monthOffset = 0, dayOffset = 0) {
+
+const now = new Date();
+
+const target = new Date(now.getFullYear(), now.getMonth() + monthOffset, now.getDate() + dayOffset);
+
+const y = target.getFullYear();
+
+const m = String(target.getMonth() + 1).padStart(2, '0');
+
+const d = String(target.getDate()).padStart(2, '0');
+
+return `${y}-${m}-${d}`;
+
+}
+
+
+function setupEventListeners() {
+
+prevMonthBtn.addEventListener('click', () => {
+
+state.currentDate.setMonth(state.currentDate.getMonth() - 1);
+
+renderAll();
+
+});
+
+
+nextMonthBtn.addEventListener('click', () => {
+
+state.currentDate.setMonth(state.currentDate.getMonth() + 1);
+
+renderAll();
+
+});
+
+
+todayBtn.addEventListener('click', () => {
+
+state.currentDate = new Date();
+
+state.selectedDate = null;
+
+renderAll();
+
+});
+
+
+categoryFilter.addEventListener('change', (e) => {
+
+state.filterCategory = e.target.value;
+
+renderAll();
+
+});
+
+
+clearSelectedDateBtn.addEventListener('click', () => {
+
+state.selectedDate = null;
+
+renderAll();
+
+});
+
+
+// Title Edit Events
+
+calendarTitleContainer.addEventListener('click', () => {
+
+if (!state.isAdmin) {
+
+showToast('管理者モードにするとカレンダー名を変更できます');
+
+return;
+
+}
+
+calendarTitleInput.value = state.calendarTitle;
+
+titleModal.classList.remove('hidden');
+
+});
+
+
+closeTitleModalBtn.addEventListener('click', () => titleModal.classList.add('hidden'));
+
+cancelTitleBtn.addEventListener('click', () => titleModal.classList.add('hidden'));
+
+
+titleForm.addEventListener('submit', async (e) => {
+
+e.preventDefault();
+
+if (!state.isAdmin) return;
+
+
+const newTitle = calendarTitleInput.value.trim();
+
+if (!newTitle) return;
+
+
+state.calendarTitle = newTitle;
+
+appTitleDisplay.textContent = newTitle;
+
+document.title = newTitle;
+
+
+try {
+
+if (db && user) {
+
+const settingsDoc = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'config');
+
+await setDoc(settingsDoc, { title: newTitle }, { merge: true });
+
+}
+
+showToast('カレンダー名を変更しました');
+
+} catch (err) {
+
+console.error("Title Update Error:", err);
+
+showToast('タイトルの保存に失敗しました');
+
+}
+
+
+titleModal.classList.add('hidden');
+
+});
+
+
+// PWA / Smartphone Guide Modal Triggers
+
+if (pwaGuideBtn) pwaGuideBtn.addEventListener('click', () => pwaGuideModal.classList.remove('hidden'));
+
+if (openPwaGuideFromBanner) openPwaGuideFromBanner.addEventListener('click', () => pwaGuideModal.classList.remove('hidden'));
+
+if (closePwaModalBtn) closePwaModalBtn.addEventListener('click', () => pwaGuideModal.classList.add('hidden'));
+
+
+notifyToggleBtn.addEventListener('click', requestNotificationPermission);
+
+
+adminToggleBtn.addEventListener('click', () => {
+
+if (state.isAdmin) {
+
+state.isAdmin = false;
+
+updateAdminUI();
+
+showToast('閲覧者モードに戻りました');
+
+} else {
+
+adminPasscode.value = '';
+
+adminErrorMsg.classList.add('hidden');
+
+adminModal.classList.remove('hidden');
+
+}
+
+});
+
+
+closeAdminModalBtn.addEventListener('click', () => adminModal.classList.add('hidden'));
+
+cancelAdminBtn.addEventListener('click', () => adminModal.classList.add('hidden'));
+
+
+adminForm.addEventListener('submit', (e) => {
+
+e.preventDefault();
+
+if (adminPasscode.value === ADMIN_PASSCODE) {
+
+state.isAdmin = true;
+
+adminModal.classList.add('hidden');
+
+updateAdminUI();
+
+showToast('管理者ログイン完了！');
+
+} else {
+
+adminErrorMsg.classList.remove('hidden');
+
+}
+
+});
+
+
+shareBtn.addEventListener('click', () => {
+
+const currentUrl = window.location.href;
+
+const tempInput = document.createElement('input');
+
+document.body.appendChild(tempInput);
+
+tempInput.value = currentUrl;
+
+tempInput.select();
+
+document.execCommand('copy');
+
+document.body.removeChild(tempInput);
+
+showToast('共有URLをコピーしました');
+
+});
+
+
+addEventBtn.addEventListener('click', () => openModal());
+
+mobileAddFab.addEventListener('click', () => openModal());
+
+closeModalBtn.addEventListener('click', closeModal);
+
+cancelModalBtn.addEventListener('click', closeModal);
+
+eventModal.addEventListener('click', (e) => {
+
+if (e.target === eventModal) closeModal();
+
+});
+
+
+eventForm.addEventListener('submit', handleFormSubmit);
+
+
+deleteEventBtn.addEventListener('click', () => {
+
+deleteConfirmModal.classList.remove('hidden');
+
+});
+
+
+cancelDeleteBtn.addEventListener('click', () => {
+
+deleteConfirmModal.classList.add('hidden');
+
+});
+
+
+confirmDeleteBtn.addEventListener('click', executeDeleteEvent);
+
+}
+
+
+// Notification UI Status Display
+
+function updateNotificationUI() {
+
+if (!("Notification" in window)) {
+
+notifyToggleBtn.className = "bg-slate-100 text-slate-400 border border-slate-200 px-2.5 py-1.5 rounded-xl font-medium text-xs flex items-center space-x-1 cursor-not-allowed";
+
+notifyIcon.className = "fa-solid fa-bell-slash text-slate-400";
+
+notifyText.textContent = "非対応";
+
+return;
+
+}
+
+
+if (Notification.permission === "granted") {
+
+notifyToggleBtn.className = "bg-emerald-500 hover:bg-emerald-600 text-white px-2.5 py-1.5 rounded-xl font-semibold text-xs flex items-center space-x-1 transition-all shadow-xs active:scale-95";
+
+notifyIcon.className = "fa-solid fa-circle-check text-white text-xs";
+
+notifyText.textContent = "通知オン";
+
+} else if (Notification.permission === "denied") {
+
+notifyToggleBtn.className = "bg-slate-200 text-slate-500 border border-slate-300 px-2.5 py-1.5 rounded-xl font-semibold text-xs flex items-center space-x-1 cursor-not-allowed";
+
+notifyIcon.className = "fa-solid fa-bell-slash text-slate-500";
+
+notifyText.textContent = "ブロック中";
+
+} else {
+
+notifyToggleBtn.className = "bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1 transition-all shadow-2xs active:scale-95 animate-pulse";
+
+notifyIcon.className = "fa-solid fa-bell text-amber-600";
+
+notifyText.textContent = "通知をオン";
+
+}
+
+}
+
+
+async function requestNotificationPermission() {
+
+if (!("Notification" in window)) {
+
+showToast("お使いのブラウザはデスクトップ通知に対応していません");
+
+return;
+
+}
+
+
+if (Notification.permission === "granted") {
+
+showToast("通知機能は設定済み（オン）です");
+
+return;
+
+}
+
+
+if (Notification.permission === "denied") {
+
+showToast("ブラウザ設定で通知が許可されていません");
+
+return;
+
+}
+
+
+const permission = await Notification.requestPermission();
+
+updateNotificationUI();
+
+
+if (permission === "granted") {
+
+showToast("通知を【オン】に設定しました！");
+
+checkUpcomingNotifications(true);
+
+}
+
+}
+
+
+function checkUpcomingNotifications(forceSend = false) {
+
+if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+
+const today = new Date();
+
+today.setHours(0, 0, 0, 0);
+
+
+state.events.forEach(ev => {
+
+const evDate = new Date(ev.date + 'T00:00:00');
+
+const diffTime = evDate.getTime() - today.getTime();
+
+const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+
+if (diffDays === 7 || diffDays === 0 || forceSend) {
+
+const notifyKey = `notified_${ev.id}_${diffDays}`;
+
+if (!localStorage.getItem(notifyKey) || forceSend) {
+
+const timeText = diffDays === 0 ? "本日開催されます！" : `あと1週間（${ev.date}）で開催予定です！`;
+
+new Notification(`【行事リマインダー】${ev.title}`, {
+
+body: `${timeText}\n${ev.memo || '詳細をご確認ください。'}`
+
+});
+
+localStorage.setItem(notifyKey, 'true');
+
+}
+
+}
+
+});
+
+}
+
+
+function renderReminders() {
+
+upcomingReminderList.innerHTML = '';
+
+const today = new Date();
+
+today.setHours(0, 0, 0, 0);
+
+
+const upcomingEvents = state.events.filter(ev => {
+
+const evDate = new Date(ev.date + 'T00:00:00');
+
+const diffTime = evDate.getTime() - today.getTime();
+
+const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+return diffDays >= 0 && diffDays <= 7;
+
+}).sort((a, b) => a.date.localeCompare(b.date));
+
+
+upcomingCount.textContent = `${upcomingEvents.length}件`;
+
+
+if (upcomingEvents.length === 0) {
+
+upcomingReminderList.innerHTML = `<p class="text-amber-700/70 italic text-center py-2 text-xs">直近7日以内の行事はありません</p>`;
+
+return;
+
+}
+
+
+upcomingEvents.forEach(ev => {
+
+const evDate = new Date(ev.date + 'T00:00:00');
+
+const diffDays = Math.ceil((evDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+const badgeText = diffDays === 0 ? '本日！' : `あと${diffDays}日`;
+
+const badgeColor = diffDays === 0 ? 'bg-rose-500 text-white animate-pulse' : 'bg-amber-200 text-amber-900 font-bold';
+
+
+const div = document.createElement('div');
+
+div.className = "bg-white/90 p-2 sm:p-2.5 rounded-xl border border-amber-200 flex items-center justify-between shadow-2xs";
+
+div.innerHTML = `
+
+<div class="truncate pr-2">
+
+<span class="font-bold text-slate-800 text-xs">${escapeHtml(ev.title)}</span>
+
+<span class="text-[10px] text-slate-500 block">${ev.date} ${ev.time ? ev.time : ''}</span>
+
+</div>
+
+<span class="text-[10px] font-bold px-2 py-0.5 rounded-md flex-shrink-0 ${badgeColor}">${badgeText}</span>
+
+`;
+
+upcomingReminderList.appendChild(div);
+
+});
+
+}
+
+
+function updateAdminUI() {
+
+if (state.isAdmin) {
+
+adminStatusIcon.className = "fa-solid fa-unlock text-emerald-400";
+
+adminStatusText.textContent = "ログアウト";
+
+adminToggleBtn.classList.remove('bg-slate-800', 'hover:bg-slate-900');
+
+adminToggleBtn.classList.add('bg-emerald-800', 'hover:bg-emerald-900');
+
+addEventBtn.classList.remove('hidden');
+
+mobileAddFab.classList.remove('hidden');
+
+editTitleIcon.classList.remove('hidden');
+
+} else {
+
+adminStatusIcon.className = "fa-solid fa-lock text-amber-400";
+
+adminStatusText.textContent = "管理者";
+
+adminToggleBtn.classList.remove('bg-emerald-800', 'hover:bg-emerald-900');
+
+adminToggleBtn.classList.add('bg-slate-800', 'hover:bg-slate-900');
+
+addEventBtn.classList.add('hidden');
+
+mobileAddFab.classList.add('hidden');
+
+editTitleIcon.classList.add('hidden');
+
+}
+
+renderAll();
+
+}
+
+
+function renderCalendar() {
+
+const year = state.currentDate.getFullYear();
+
+const month = state.currentDate.getMonth();
+
+
+currentMonthDisplay.textContent = `${year}年 ${month + 1}月`;
+
+calendarGrid.innerHTML = '';
+
+
+const firstDayIndex = new Date(year, month, 1).getDay();
+
+const lastDay = new Date(year, month + 1, 0).getDate();
+
+const prevLastDay = new Date(year, month, 0).getDate();
+
+const todayStr = getTodayString();
+
+
+for (let i = firstDayIndex; i > 0; i--) {
+
+const dayNum = prevLastDay - i + 1;
+
+const cell = createCell(dayNum, true);
+
+calendarGrid.appendChild(cell);
+
+}
+
+
+for (let day = 1; day <= lastDay; day++) {
+
+const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+const isToday = dateStr === todayStr;
+
+const isSelected = dateStr === state.selectedDate;
+
+
+const dayEvents = state.events.filter(e => {
+
+const matchCategory = state.filterCategory === 'all' || e.category === state.filterCategory;
+
+return e.date === dateStr && matchCategory;
+
+});
+
+
+const cell = createCell(day, false, isToday, isSelected, dateStr, dayEvents);
+
+calendarGrid.appendChild(cell);
+
+}
+
+
+const totalCellsSoFar = firstDayIndex + lastDay;
+
+const remainingCells = (7 - (totalCellsSoFar % 7)) % 7;
+
+for (let i = 1; i <= remainingCells; i++) {
+
+const cell = createCell(i, true);
+
+calendarGrid.appendChild(cell);
+
+}
+
+}
+
+
+function createCell(dayNumber, isOtherMonth, isToday = false, isSelected = false, dateStr = null, events = []) {
+
+const cell = document.createElement('div');
+
+cell.className = `min-h-[58px] sm:min-h-[90px] border border-slate-100 rounded-xl p-1 sm:p-1.5 flex flex-col justify-between transition-all ${
+
+isOtherMonth ? 'bg-slate-50/50 text-slate-300 opacity-40 pointer-events-none' : 'bg-white hover:border-indigo-300 cursor-pointer active:bg-indigo-50/30'
+
+}`;
+
+
+if (isSelected) {
+
+cell.classList.add('ring-2', 'ring-indigo-500', 'bg-indigo-50/30');
+
+}
+
+
+if (!isOtherMonth) {
+
+cell.addEventListener('click', () => {
+
+state.selectedDate = dateStr;
+
+renderAll();
+
+});
+
+}
+
+
+const header = document.createElement('div');
+
+header.className = 'flex items-center justify-between';
+
+
+const dayNumSpan = document.createElement('span');
+
+dayNumSpan.className = `text-xs sm:text-sm font-semibold inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full ${
+
+isToday ? 'bg-indigo-600 text-white shadow-2xs font-bold' : 'text-slate-700'
+
+}`;
+
+dayNumSpan.textContent = dayNumber;
+
+
+header.appendChild(dayNumSpan);
+
+
+const eventContainer = document.createElement('div');
+
+eventContainer.className = 'space-y-0.5 sm:space-y-1 mt-0.5 overflow-hidden flex-1';
+
+
+const maxVisible = 2;
+
+events.slice(0, maxVisible).forEach(ev => {
+
+const cat = CATEGORIES[ev.category] || CATEGORIES.school;
+
+const badge = document.createElement('div');
+
+badge.className = `text-[9px] sm:text-xs px-1 py-0.5 rounded-md truncate font-medium ${cat.bg} ${cat.text} flex items-center space-x-1`;
+
+badge.title = `${ev.time ? ev.time + ' ' : ''}${ev.title}`;
+
+badge.innerHTML = `<span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${cat.dot} flex-shrink-0"></span><span class="truncate hidden sm:inline">${escapeHtml(ev.title)}</span>`;
+
+eventContainer.appendChild(badge);
+
+});
+
+
+if (events.length > maxVisible) {
+
+const more = document.createElement('div');
+
+more.className = 'text-[8px] sm:text-[9px] text-slate-400 font-bold px-0.5';
+
+more.textContent = `+${events.length - maxVisible}`;
+
+eventContainer.appendChild(more);
+
+}
+
+
+cell.appendChild(header);
+
+cell.appendChild(eventContainer);
+
+
+return cell;
+
+}
+
+
+function renderEventSidebar() {
+
+eventList.innerHTML = '';
+
+
+let filteredEvents = [...state.events];
+
+
+if (state.filterCategory !== 'all') {
+
+filteredEvents = filteredEvents.filter(e => e.category === state.filterCategory);
+
+}
+
+
+if (state.selectedDate) {
+
+const [y, m, d] = state.selectedDate.split('-');
+
+sidebarTitle.textContent = `${parseInt(m)}月${parseInt(d)}日の行事`;
+
+sidebarSubtitle.textContent = 'タップした日の予定';
+
+clearSelectedDateBtn.classList.remove('hidden');
+
+
+filteredEvents = filteredEvents.filter(e => e.date === state.selectedDate);
+
+} else {
+
+const year = state.currentDate.getFullYear();
+
+const month = state.currentDate.getMonth() + 1;
+
+const monthStr = `${year}-${String(month).padStart(2, '0')}`;
+
+
+sidebarTitle.textContent = `${year}年 ${month}月の行事`;
+
+sidebarSubtitle.textContent = '今月予定されている全イベント';
+
+clearSelectedDateBtn.classList.add('hidden');
+
+
+filteredEvents = filteredEvents.filter(e => e.date.startsWith(monthStr));
+
+}
+
+
+filteredEvents.sort((a, b) => {
+
+if (a.date !== b.date) return a.date.localeCompare(b.date);
+
+return (a.time || '00:00').localeCompare(b.time || '00:00');
+
+});
+
+
+if (filteredEvents.length === 0) {
+
+eventList.innerHTML = `
+
+<div class="text-center py-8 sm:py-12 px-4 text-slate-400">
+
+<i class="fa-regular fa-calendar-xmark text-3xl sm:text-4xl mb-2 text-slate-300"></i>
+
+<p class="text-xs sm:text-sm font-medium">行事予定はありません</p>
+
+${state.isAdmin ? '<p class="text-[11px] text-slate-400 mt-1">「+」ボタンから簡単に追加できます</p>' : ''}
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+filteredEvents.forEach(ev => {
+
+const cat = CATEGORIES[ev.category] || CATEGORIES.school;
+
+const card = document.createElement('div');
+
+card.className = `p-3 rounded-xl border ${cat.border} bg-white shadow-2xs transition-all ${state.isAdmin ? 'hover:shadow-md cursor-pointer group active:scale-[0.99]' : ''} flex flex-col space-y-1.5`;
+
+const dateObj = new Date(ev.date + 'T00:00:00');
+
+const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
+
+const formattedDate = `${dateObj.getMonth() + 1}/${dateObj.getDate()} (${dayOfWeek})`;
+
+
+card.innerHTML = `
+
+<div class="flex items-center justify-between">
+
+<div class="flex items-center space-x-1.5">
+
+<span class="text-[10px] sm:text-xs px-2 py-0.5 rounded-md font-semibold ${cat.bg} ${cat.text}">
+
+${cat.name}
+
+</span>
+
+${ev.time ? `<span class="text-[11px] sm:text-xs text-slate-500 font-medium"><i class="fa-regular fa-clock mr-0.5"></i>${ev.time}</span>` : ''}
+
+</div>
+
+<span class="text-[11px] sm:text-xs font-bold text-slate-500">${formattedDate}</span>
+
+</div>
+
+
+<h4 class="font-bold text-slate-800 text-xs sm:text-sm ${state.isAdmin ? 'group-hover:text-indigo-600' : ''}">${escapeHtml(ev.title)}</h4>
+
+${ev.memo ? `<p class="text-[11px] text-slate-600 line-clamp-2 bg-slate-50 p-2 rounded-lg border border-slate-100">${escapeHtml(ev.memo)}</p>` : ''}
+
+`;
+
+
+if (state.isAdmin) {
+
+card.addEventListener('click', () => openModal(ev));
+
+}
+
+
+eventList.appendChild(card);
+
+});
+
+}
+
+
+function openModal(eventToEdit = null) {
+
+if (!state.isAdmin) return;
+
+
+eventForm.reset();
+
+
+if (eventToEdit) {
+
+modalTitle.textContent = '行事を編集';
+
+inputId.value = eventToEdit.id;
+
+inputTitle.value = eventToEdit.title;
+
+inputDate.value = eventToEdit.date;
+
+inputTime.value = eventToEdit.time || '';
+
+inputCategory.value = eventToEdit.category;
+
+inputMemo.value = eventToEdit.memo || '';
+
+deleteEventBtn.classList.remove('hidden');
+
+} else {
+
+modalTitle.textContent = '新規行事を追加';
+
+inputId.value = '';
+
+inputDate.value = state.selectedDate || getTodayString();
+
+deleteEventBtn.classList.add('hidden');
+
+}
+
+
+eventModal.classList.remove('hidden');
+
+}
+
+
+function closeModal() {
+
+eventModal.classList.add('hidden');
+
+}
+
+
+async function handleFormSubmit(e) {
+
+e.preventDefault();
+
+if (!state.isAdmin) return;
+
+
+const id = inputId.value;
+
+const newEventData = {
+
+title: inputTitle.value.trim(),
+
+date: inputDate.value,
+
+time: inputTime.value || '',
+
+category: inputCategory.value,
+
+memo: inputMemo.value.trim()
+
+};
+
+
+try {
+
+if (db && user) {
+
+if (id) {
+
+const eventRef = doc(db, 'artifacts', appId, 'public', 'data', 'events', id);
+
+await updateDoc(eventRef, newEventData);
+
+showToast('行事を更新しました');
+
+} else {
+
+const eventsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'events');
+
+await addDoc(eventsCollection, newEventData);
+
+showToast('新しい行事を登録しました');
+
+}
+
+} else {
+
+if (id) {
+
+const idx = state.events.findIndex(e => e.id === id);
+
+if (idx !== -1) state.events[idx] = { id, ...newEventData };
+
+} else {
+
+state.events.push({ id: Date.now().toString(), ...newEventData });
+
+}
+
+renderAll();
+
+}
+
+closeModal();
+
+checkUpcomingNotifications(true);
+
+} catch (err) {
+
+console.error("Save Error:", err);
+
+showToast("保存に失敗しました");
+
+}
+
+}
+
+
+async function executeDeleteEvent() {
+
+if (!state.isAdmin) return;
+
+
+const id = inputId.value;
+
+if (!id) return;
+
+
+try {
+
+if (db && user) {
+
+const eventRef = doc(db, 'artifacts', appId, 'public', 'data', 'events', id);
+
+await deleteDoc(eventRef);
+
+} else {
+
+state.events = state.events.filter(e => e.id !== id);
+
+renderAll();
+
+}
+
+deleteConfirmModal.classList.add('hidden');
+
+closeModal();
+
+showToast('行事を削除しました');
+
+} catch (err) {
+
+console.error("Delete Error:", err);
+
+deleteConfirmModal.classList.add('hidden');
+
+showToast("削除に失敗しました");
+
+}
+
+}
+
+
+function showToast(message) {
+
+const toast = document.getElementById('toast');
+
+const toastMsg = document.getElementById('toast-message');
+
+toastMsg.textContent = message;
+
+
+toast.classList.remove('translate-y-20', 'opacity-0');
+
+toast.classList.add('translate-y-0', 'opacity-100');
+
+
+setTimeout(() => {
+
+toast.classList.remove('translate-y-0', 'opacity-100');
+
+toast.classList.add('translate-y-20', 'opacity-0');
+
+}, 3000);
+
+}
+
+
+function getTodayString() {
+
+const today = new Date();
+
+const y = today.getFullYear();
+
+const m = String(today.getMonth() + 1).padStart(2, '0');
+
+const d = String(today.getDate()).padStart(2, '0');
+
+return `${y}-${m}-${d}`;
+
+}
+
+
+function escapeHtml(str) {
+
+if (!str) return '';
+
+return str
+
+.replace(/&/g, "&amp;")
+
+.replace(/</g, "&lt;")
+
+.replace(/>/g, "&gt;")
+
+.replace(/"/g, "&quot;")
+
+.replace(/'/g, "&#039;");
+
+}
+
+
+window.addEventListener('DOMContentLoaded', init);
+
+</script>
+
+</body>
+
+</html>
+
