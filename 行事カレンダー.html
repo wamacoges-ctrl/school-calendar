@@ -1,15 +1,16 @@
 <!doctype html>
-<html lang="ja"><head>
+<html lang="ja">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>行事カレンダー</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&amp;display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f4f6f3;--surface:#fff;--ink:#1f2a37;--sub:#5d6b7a;--line:#d9dfd8;--main:#2b4c7e;--on-main:#fff;--today:#e8a317;--c-event:#2b4c7e;--c-meet:#2f7d5b;--c-duty:#c2570c;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14191f;--surface:#1c232b;--ink:#e8ecef;--sub:#9aa7b3;--line:#2c3640;--main:#8fb0e3;--on-main:#14191f;--today:#f0b84a;--c-event:#8fb0e3;--c-meet:#6fc29b;--c-duty:#f09a5c;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#14191f;--surface:#1c232b;--ink:#e8ecef;--sub:#9aa7b3;--line:#2c3640;--main:#8fb0e3;--on-main:#14191f;--today:#f0b84a;--c-event:#8fb0e3;--c-meet:#6fc29b;--c-duty:#f09a5c;color-scheme:dark}
+:root{--bg:#f4f6f3;--surface:#fff;--ink:#1f2a37;--sub:#5d6b7a;--line:#d9dfd8;--main:#2b4c7e;--on-main:#fff;--today:#e8a317;--c-event:#2b4c7e;--c-meet:#2f7d5b;--c-duty:#c2570c;--c-exam:#7a3fa0;--c-holiday:#b3261e;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14191f;--surface:#1c232b;--ink:#e8ecef;--sub:#9aa7b3;--line:#2c3640;--main:#8fb0e3;--on-main:#14191f;--today:#f0b84a;--c-event:#8fb0e3;--c-meet:#6fc29b;--c-duty:#f09a5c;--c-exam:#c49af0;--c-holiday:#f28b82;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14191f;--surface:#1c232b;--ink:#e8ecef;--sub:#9aa7b3;--line:#2c3640;--main:#8fb0e3;--on-main:#14191f;--today:#f0b84a;--c-event:#8fb0e3;--c-meet:#6fc29b;--c-duty:#f09a5c;--c-exam:#c49af0;--c-holiday:#f28b82;color-scheme:dark}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;line-height:1.6}
 main{max-width:560px;margin:0 auto;padding:20px 16px 40px}
@@ -37,6 +38,8 @@ button:focus-visible{outline:3px solid var(--main);outline-offset:2px}
 .event{--c:var(--c-event)}
 .meet{--c:var(--c-meet)}
 .duty{--c:var(--c-duty)}
+.exam{--c:var(--c-exam)}
+.holiday{--c:var(--c-holiday)}
 .dot{background:var(--c)}
 .head{display:flex;align-items:center;justify-content:space-between;margin:22px 0 8px}
 .head h3{font-size:1.05rem;margin:0}
@@ -74,16 +77,34 @@ textarea{min-height:0}
 .when2{font-weight:700;min-width:3.4em;color:var(--c)}
 .addcal{display:inline-block;margin-top:2px;font-size:.8rem;color:var(--main);line-height:32px}
 .btns2 button{border:1px solid var(--line);background:none;border-radius:8px;min-height:40px;padding:0 12px;font-size:.85rem}
+#notify{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:16px}
+#notify h3{margin:0 0 4px;font-size:1rem}
+#icsBtn{min-height:44px;padding:0 16px;border-radius:8px;border:0;background:var(--main);color:var(--on-main);font-weight:700;margin-top:8px}
+#subUrl{font-size:.8rem}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+.top h1{margin:0}
+.top #login{margin:0;white-space:nowrap;min-height:40px}
+#ldlg{width:min(94vw,560px)}
+.logrow{border-top:1px solid var(--line);padding:6px 0;font-size:.85rem;word-break:break-all}
+.logrow b{margin-right:4px}
+#who{margin:0 0 6px}
+dialog{max-height:90vh;max-height:90dvh;overflow:auto}
+#savebar{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:2px solid var(--today);box-shadow:0 -2px 8px rgba(0,0,0,.15);font-size:.9rem}
+#savebar[hidden]{display:none}
+#saveBtn{min-height:44px;padding:0 14px;border-radius:8px;border:0;background:var(--main);color:var(--on-main);font-weight:700}
+body.saving main{padding-bottom:96px}
 </style>
 </head>
 <body>
 <main>
-  <h1>行事カレンダー</h1>
-  <p class="note">日付をタップすると、その日の予定が見られます。(サンプルの予定が入っています)</p>
-  <div id="adminbar" hidden="">編集モードです。「＋予定を追加」や各予定の「編集」から変更できます。変更はすべての閲覧者にすぐ反映されます。
-    <div class="btns2"><button id="logout">編集モードを終了</button><button id="chpass">パスコードを変更</button></div></div>
+  <div class="top"><h1 id="ttl">行事カレンダー</h1><button id="login" hidden>🔒 管理者モード</button></div>
+  <p class="note">日付をタップすると、その日の予定が見られます。</p>
+  <div id="adminbar" hidden>編集モードです。変更したら「更新したファイルを保存」を押して、新しいファイルをメンバーに配り直してください。
+    <div id="who" class="note"></div>
+    <div id="calInfo" class="note"></div>
+    <div class="btns2"><button id="dl">更新したファイルを保存</button><button id="calRename">予定表の名前を変更</button><button id="calDel">この予定表を削除</button><select id="expMode" aria-label="書き出す形式" style="width:auto;min-height:40px"><option value="view">配布用は閲覧専用</option><option value="edit">管理者モード付き(先生用)</option></select><button id="expOne">この予定表だけのファイルを保存(配布用)</button><button id="expAll">すべて別々のファイルで保存</button><button id="logout">編集モードを終了</button><button id="chpass">パスコードを変更</button><button id="addAdmin">管理者を追加</button><button id="logBtn">履歴を見る</button><button id="calHist">この予定表の履歴</button></div></div>
   <p class="note" id="msg" role="status"></p>
-  <button id="login" hidden="">管理者モードに入る</button>
+  <div class="chips" id="cals"></div>
   <div id="soon" hidden></div>
   <div class="nav">
     <button id="prev" aria-label="前の月">‹</button>
@@ -95,75 +116,781 @@ textarea{min-height:0}
   <div class="head"><h3 id="listTitle"></h3><span><button id="all" hidden="">月全体を見る</button> <button id="add" hidden="">＋予定を追加</button></span></div>
   <ul id="list"></ul>
   <p class="note">各予定の「カレンダーに追加」から、自分のカレンダーに登録できます。登録すると、お使いのカレンダーアプリの通知設定で予定を知らせてもらえます。</p>
+  <section id="notify">
+    <h3>スマホに通知を受け取る</h3>
+    <p class="note">下のボタンで、これからの予定がまとめて入ったファイル(.ics)が保存されます。開いてカレンダーに追加すると、選んだタイミングでスマホに通知が届きます。iPhoneは「すべてを追加」、Androidはカレンダーアプリで開いてください。</p>
+    <label>通知のタイミング<select id="icsMode"><option value="3">前日の夕方と当日の朝</option><option value="1">前日の夕方(18時)</option><option value="2">当日の朝(7時)</option></select></label>
+    <button id="icsBtn">スマホのカレンダーに登録(通知つき)</button>
+    <p class="note" id="icsMsg" role="status">予定を変えたときは、もう一度登録してください。</p>
+  </section>
 </main>
 <dialog id="dlg" aria-labelledby="dlgTitle">
 <form id="f">
-<h3 id="dlgTitle">予定を編集</h3>
+<h3 id="dlgTitle"></h3>
+<p class="note" id="evInfo"></p>
 <label>日付<input type="date" id="f_d"></label>
 <label>タイトル<input id="f_t" maxlength="60"></label>
 <label>時間<input id="f_time" placeholder="10:00〜12:00"></label>
 <label>場所<input id="f_place"></label>
-<label>区分<select id="f_cat"><option value="event">行事</option><option value="meet">会議</option><option value="duty">当番・募集</option></select></label>
+<label>区分<select id="f_cat"><option value="event">行事</option><option value="exam">試験・入試</option><option value="holiday">休日・休業</option><option value="meet">会議</option><option value="duty">締切・事務</option></select></label>
 <label>メモ<textarea id="f_note" rows="3"></textarea></label>
 <p class="err" id="err" role="alert"></p>
-<div class="btns"><button type="button" id="del" class="danger">もう一度押すと削除</button><span></span><button type="button" id="cancel">キャンセル</button><button type="submit" class="primary">保存</button></div>
+<div class="btns"><button type="button" id="del" class="danger">削除</button><button type="button" id="evHist">履歴</button><span></span><button type="button" id="cancel">キャンセル</button><button type="button" id="fOk" class="primary">保存</button></div>
 </form>
+</dialog>
+<dialog id="cdlg" aria-labelledby="cTitle">
+<form id="cf">
+<h3 id="cTitle"></h3>
+<label>予定表の名前<input id="c_name" maxlength="30" placeholder="例: 1年A組、野球部"></label>
+<label id="c_copyrow"><input type="checkbox" id="c_copy" style="width:auto;min-height:0;margin-right:6px">いまの予定表の内容をコピーして作る</label>
+<p class="err" id="cErr" role="alert"></p>
+<div class="btns"><span></span><button type="button" id="cCancel">キャンセル</button><button type="button" id="cOk" class="primary">決定</button></div>
+</form>
+</dialog>
+<div id="savebar" hidden><span>保存していない変更があります。</span><button id="saveBtn">更新したファイルを保存</button></div>
+<dialog id="rdlg" aria-labelledby="rTitle">
+<h3 id="rTitle">編集状態を復元しますか?</h3>
+<p class="note" id="rMsg"></p>
+<p class="note">「このファイルのまま使う」を選ぶと、端末に残っている新しい状態は上書きされます。</p>
+<div class="btns"><button type="button" id="rNo">このファイルのまま使う</button><span></span><button type="button" id="rYes" class="primary">復元する</button></div>
+</dialog>
+<dialog id="ldlg" aria-labelledby="lTitle">
+<h3 id="lTitle">操作の履歴</h3>
+<p class="note" id="lNote"></p>
+<div id="logList" style="max-height:50vh;overflow:auto"></div>
+<div class="btns"><button type="button" id="lCsv">CSVで保存</button><span></span><button type="button" id="lClose" class="primary">閉じる</button></div>
 </dialog>
 <dialog id="pdlg" aria-labelledby="pTitle">
 <form id="pf">
-<h3 id="pTitle">パスコードを設定</h3>
-<p class="note" id="pHelp">管理者モードに入るときに使います。4文字以上で決めてください。</p>
+<h3 id="pTitle"></h3>
+<p class="note" id="pHelp"></p>
+<label id="p_namerow">お名前<input id="p_name" maxlength="20" autocomplete="off"></label>
 <label>パスコード<input type="password" id="p_in" autocomplete="off"></label>
 <p class="err" id="pErr" role="alert"></p>
-<div class="btns"><span></span><button type="button" id="pCancel">キャンセル</button><button type="submit" class="primary">決定</button></div>
+<div class="btns"><span></span><button type="button" id="pCancel">キャンセル</button><button type="button" id="pOk" class="primary">決定</button></div>
 </form>
 </dialog>
 <script>
-const CATS={event:'行事',meet:'会議',duty:'当番・募集'};
-let PASS='4b88a8a4025c6b5da954e1c6772a3887b9aeadd305003d576c3813430353fd75';
-// 予定はここに追加・編集します
-const EVENTS=[
+const CATS={event:'行事',exam:'試験・入試',holiday:'休日・休業',meet:'会議',duty:'締切・事務'};
+const VIEWONLY=false;
+const FID='f_yebromnl';
+const BUILT='2026-10-28T01:01:07.000Z';
+let ACCOUNTS=[];
+let LOG=[];
+// 予定表(カレンダー)の一覧です。管理者モードで編集すると自動で書き換わります。
+const CALS=[
  {
-  "d": "2026-11-03",
-  "t": "文化の日 地域クリーン活動",
-  "time": "8:00〜9:30",
-  "place": "中央公園 集合",
-  "cat": "event",
-  "note": "軍手と飲み物を持参。雨天は中止。"
- },
- {
-  "d": "2026-11-08",
-  "t": "役員会",
-  "time": "19:30〜20:30",
-  "place": "公民館 会議室",
-  "cat": "meet",
-  "note": "年末行事の担当を決めます。"
- },
- {
-  "d": "2026-11-15",
-  "t": "防災訓練",
-  "time": "9:00〜11:00",
-  "place": "小学校 校庭",
-  "cat": "event",
-  "note": "消火器の使い方を体験できます。"
- },
- {
-  "d": "2026-11-22",
-  "t": "年末夜回り 当番募集",
-  "time": "",
-  "place": "",
-  "cat": "duty",
-  "note": "12月の当番を募集中です。希望は世話役まで。"
- },
- {
-  "d": "2026-12-13",
-  "t": "餅つき大会",
-  "time": "10:00〜13:00",
-  "place": "公民館 前庭",
-  "cat": "event",
-  "note": "参加費は無料。つきたてのお餅を配ります。"
+  "id": "c1",
+  "name": "学校全体",
+  "events": [
+   {
+    "d": "2026-11-02",
+    "t": "定時退勤日",
+    "time": "",
+    "place": "",
+    "cat": "duty",
+    "note": ""
+   },
+   {
+    "d": "2026-11-02",
+    "t": "見学旅行①",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2026-11-03",
+    "t": "文化の日",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2026-11-03",
+    "t": "見学旅行②",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2026-11-04",
+    "t": "見学旅行③",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2026-11-05",
+    "t": "見学旅行④",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2026-11-06",
+    "t": "振替休日（2年）",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2026-11-08",
+    "t": "第2回英語技能検定（二次）",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2026-11-15",
+    "t": "危険物取扱者試験",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2026-11-15",
+    "t": "消防設備士試験",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2026-11-20",
+    "t": "計算技術検定",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2026-11-20",
+    "t": "定時退勤日",
+    "time": "",
+    "place": "",
+    "cat": "duty",
+    "note": ""
+   },
+   {
+    "d": "2026-11-23",
+    "t": "勤労感謝の日",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2026-11-24",
+    "t": "2学期中間考査①",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2026-11-25",
+    "t": "2学期中間考査②",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2026-11-26",
+    "t": "2学期中間考査③",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2026-11-27",
+    "t": "2学期中間考査④",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2026-11-30",
+    "t": "追考査①",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2026-12-01",
+    "t": "定時退勤日",
+    "time": "",
+    "place": "",
+    "cat": "duty",
+    "note": ""
+   },
+   {
+    "d": "2026-12-01",
+    "t": "追考査②",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2026-12-02",
+    "t": "追考査③",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2026-12-03",
+    "t": "同窓会理事会②",
+    "time": "",
+    "place": "",
+    "cat": "meet",
+    "note": ""
+   },
+   {
+    "d": "2026-12-08",
+    "t": "単票提出締切日",
+    "time": "",
+    "place": "",
+    "cat": "duty",
+    "note": ""
+   },
+   {
+    "d": "2026-12-10",
+    "t": "一覧表提出締切",
+    "time": "",
+    "place": "",
+    "cat": "duty",
+    "note": ""
+   },
+   {
+    "d": "2026-12-16",
+    "t": "進路体験発表会",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2026-12-21",
+    "t": "定時退勤日",
+    "time": "",
+    "place": "",
+    "cat": "duty",
+    "note": ""
+   },
+   {
+    "d": "2026-12-25",
+    "t": "全校集会",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2026-12-26",
+    "t": "冬季休業開始",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2026-12-29",
+    "t": "年末の休日",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2026-12-30",
+    "t": "年末の休日",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2026-12-31",
+    "t": "年末の休日",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-01-01",
+    "t": "元日",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-01-02",
+    "t": "年始の休日",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-01-03",
+    "t": "年始の休日",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-01-04",
+    "t": "定時退勤日",
+    "time": "",
+    "place": "",
+    "cat": "duty",
+    "note": ""
+   },
+   {
+    "d": "2027-01-06",
+    "t": "高教研",
+    "time": "",
+    "place": "",
+    "cat": "meet",
+    "note": ""
+   },
+   {
+    "d": "2027-01-07",
+    "t": "高教研各部会",
+    "time": "",
+    "place": "",
+    "cat": "meet",
+    "note": ""
+   },
+   {
+    "d": "2027-01-11",
+    "t": "成人の日",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-01-12",
+    "t": "バレーボール新人大会（会場校）",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2027-01-13",
+    "t": "バレーボール新人大会（会場校）",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2027-01-14",
+    "t": "工業クラブ大会",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2027-01-15",
+    "t": "情報技術検定",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-01-15",
+    "t": "工業クラブ大会",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2027-01-17",
+    "t": "冬季休業終了",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-01-18",
+    "t": "全校集会",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2027-01-21",
+    "t": "定時退勤日",
+    "time": "",
+    "place": "",
+    "cat": "duty",
+    "note": ""
+   },
+   {
+    "d": "2027-01-24",
+    "t": "第3回英語技能検定（一次）",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-01-27",
+    "t": "2学期期末考査（3年）①",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-01-28",
+    "t": "2学期期末考査（3年）②",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-01-29",
+    "t": "2学期期末考査（3年）③",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-02-01",
+    "t": "定時退勤日",
+    "time": "",
+    "place": "",
+    "cat": "duty",
+    "note": ""
+   },
+   {
+    "d": "2027-02-01",
+    "t": "追考査①",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-02-02",
+    "t": "追考査②",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-02-05",
+    "t": "高等学校基礎学力テスト",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-02-07",
+    "t": "危険物取扱者試験",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-02-07",
+    "t": "消防設備士試験",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-02-09",
+    "t": "推薦入学面接日",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-02-10",
+    "t": "単票提出締切（3年）",
+    "time": "",
+    "place": "",
+    "cat": "duty",
+    "note": ""
+   },
+   {
+    "d": "2027-02-11",
+    "t": "建国記念の日",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-02-12",
+    "t": "一覧表提出締切（3年）",
+    "time": "",
+    "place": "",
+    "cat": "duty",
+    "note": ""
+   },
+   {
+    "d": "2027-02-18",
+    "t": "2学期期末考査（1・2年）①",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-02-19",
+    "t": "2学期期末考査（1・2年）②",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-02-19",
+    "t": "定時退勤日",
+    "time": "",
+    "place": "",
+    "cat": "duty",
+    "note": ""
+   },
+   {
+    "d": "2027-02-22",
+    "t": "2学期期末考査（1・2年）③",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-02-23",
+    "t": "天皇誕生日",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-02-24",
+    "t": "2学期期末考査（1・2年）④",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-02-26",
+    "t": "卒業式予行",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2027-02-26",
+    "t": "同窓会入会説明会",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2027-02-28",
+    "t": "第3回英語技能検定（二次）",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-03-01",
+    "t": "卒業式",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2027-03-01",
+    "t": "定時退勤日",
+    "time": "",
+    "place": "",
+    "cat": "duty",
+    "note": ""
+   },
+   {
+    "d": "2027-03-03",
+    "t": "学力検査日",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-03-10",
+    "t": "追検査日",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-03-16",
+    "t": "合格発表日",
+    "time": "",
+    "place": "",
+    "cat": "exam",
+    "note": ""
+   },
+   {
+    "d": "2027-03-19",
+    "t": "定時退勤日",
+    "time": "",
+    "place": "",
+    "cat": "duty",
+    "note": ""
+   },
+   {
+    "d": "2027-03-21",
+    "t": "春分の日",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-03-22",
+    "t": "振替休日",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-03-23",
+    "t": "体文大会（春）",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2027-03-24",
+    "t": "修了式",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2027-03-24",
+    "t": "離任式",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2027-03-25",
+    "t": "学年末休業①",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-03-25",
+    "t": "新入生物品販売",
+    "time": "",
+    "place": "",
+    "cat": "event",
+    "note": ""
+   },
+   {
+    "d": "2027-03-26",
+    "t": "学年末休業②",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-03-27",
+    "t": "学年末休業③",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-03-28",
+    "t": "学年末休業④",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-03-29",
+    "t": "学年末休業⑤",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-03-30",
+    "t": "学年末休業⑥",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   },
+   {
+    "d": "2027-03-31",
+    "t": "学年末休業⑦",
+    "time": "",
+    "place": "",
+    "cat": "holiday",
+    "note": ""
+   }
+  ]
  }
 ];
+let ci=0,EVENTS=CALS[0].events;
 const W='日月火水木金土',pad=n=>String(n).padStart(2,'0');
 const ymd=d=>d.replace(/-/g,'');
 function calLink(e){
@@ -180,6 +907,37 @@ function calLink(e){
   }
   const q=new URLSearchParams({action:'TEMPLATE',text:e.t,dates:dates,details:e.note||'',location:e.place||''});
   return '<div><a class="addcal" href="https://calendar.google.com/calendar/render?'+q.toString().replace(/&/g,'&amp;')+'" target="_blank" rel="noopener noreferrer">カレンダーに追加</a></div>';
+}
+function icsEsc(t){return String(t||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n')}
+function icsFold(line){let out='',cur=0,first=true;for(const ch of line){const n=unescape(encodeURIComponent(ch)).length;if(cur+n>(first?75:74)){out+='\r\n ';cur=0;first=false}out+=ch;cur+=n}return out}
+function icsUid(e){let h=0;const s=CALS[ci].id+e.d+e.t+(e.time||'');for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return ymd(e.d)+'-'+(h>>>0).toString(16)}
+function buildIcs(list,mode){
+  const AL={true:{1:['-P1D'],2:['-PT1H'],3:['-P1D','-PT1H']},false:{1:['-PT6H'],2:['PT7H'],3:['-PT6H','PT7H']}};
+  const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.[0-9]+/,'');
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//gyoji-calendar//JA','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:'+icsEsc(CALS[ci].name),'X-WR-TIMEZONE:Asia/Tokyo','REFRESH-INTERVAL;VALUE=DURATION:PT12H','X-PUBLISHED-TTL:PT12H'];
+  list.forEach(e=>{
+    const tm=(e.time||'').match(/([0-9]{1,2}):([0-9]{2})(?: ?[〜~–-] ?([0-9]{1,2}):([0-9]{2}))?/),d=ymd(e.d);
+    L.push('BEGIN:VEVENT','UID:'+icsUid(e)+'@gyoji-calendar','DTSTAMP:'+stamp);
+    if(tm){
+      const a=pad(+tm[1])+tm[2]+'00',b=tm[3]?pad(+tm[3])+tm[4]+'00':pad((+tm[1]+1)%24)+tm[2]+'00';
+      L.push('DTSTART:'+d+'T'+a,'DTEND:'+d+'T'+b);
+    }else{
+      const n=new Date(e.d+'T00:00:00');n.setDate(n.getDate()+1);
+      L.push('DTSTART;VALUE=DATE:'+d,'DTEND;VALUE=DATE:'+n.getFullYear()+pad(n.getMonth()+1)+pad(n.getDate()));
+    }
+    L.push('SUMMARY:'+icsEsc(e.t));
+    if(e.place)L.push('LOCATION:'+icsEsc(e.place));
+    if(e.note)L.push('DESCRIPTION:'+icsEsc(e.note));
+    AL[!!tm][mode].forEach(a=>L.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+icsEsc(e.t),'TRIGGER:'+a,'END:VALARM'));
+    L.push('END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  return L.map(icsFold).join('\r\n')+'\r\n';
+}
+function dlIcs(name,text){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([text],{type:'text/calendar;charset=utf-8'}));
+  a.download=name;document.body.appendChild(a);a.click();a.remove();
 }
 function renderSoon(){
   const td=new Date(now.getFullYear(),now.getMonth(),now.getDate());
@@ -207,49 +965,40 @@ function render(){
   const p=y+'-'+pad(m+1);
   const list=ev.filter(e=>sel?e.d===sel:e.d.startsWith(p)).sort((a,b)=>(a.d+a.time).localeCompare(b.d+b.time));
   $('listTitle').textContent=sel?(+sel.slice(5,7))+'月'+(+sel.slice(8))+'日の予定':(m+1)+'月の予定';
-  $('all').hidden=!sel;$('add').hidden=!admin;renderSoon();
+  $('all').hidden=!sel;$('add').hidden=!admin;renderSoon();renderCals();updateSaveBar();updateInfo();
   $('list').innerHTML=list.length?list.map(e=>{
     const dt=new Date(e.d+'T00:00:00');
     const meta=[e.time,e.place].filter(Boolean).join('　');
-    return '<li class="'+e.cat+'"><div class="when"><b>'+dt.getDate()+'</b><span>'+W[dt.getDay()]+'曜</span></div><div class="body"><span class="tag">'+CATS[e.cat]+'</span><strong>'+esc(e.t)+'</strong>'+(meta?'<div class="meta">'+esc(meta)+'</div>':'')+(e.note?'<div class="meta">'+esc(e.note)+'</div>':'')+calLink(e)+'</div>'+(admin?'<button class="edit" data-i="'+EVENTS.indexOf(e)+'" aria-label="予定を編集">編集</button>':'')+'</li>';
+    return '<li class="'+e.cat+'"><div class="when"><b>'+dt.getDate()+'</b><span>'+W[dt.getDay()]+'曜</span></div><div class="body"><span class="tag">'+CATS[e.cat]+'</span><strong>'+esc(e.t)+'</strong>'+(meta?'<div class="meta">'+esc(meta)+'</div>':'')+(e.note?'<div class="meta">'+esc(e.note)+'</div>':'')+calLink(e)+(admin&&e.ub?'<div class="meta">最終更新: '+esc(e.ub)+' '+fmtT(e.ua)+'</div>':'')+'</div>'+(admin?'<button class="edit" data-i="'+EVENTS.indexOf(e)+'" aria-label="予定を編集">編集</button>':'')+'</li>';
   }).join(''):'<li class="empty" style="display:block">'+(sel?'この日の予定はありません。':'この月の予定はまだありません。')+'</li>';
 }
+$('icsBtn').onclick=()=>{
+  const td=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const list=EVENTS.filter(e=>new Date(e.d+'T00:00:00')>=td);
+  if(!list.length){$('icsMsg').textContent='これからの予定がありません。';return}
+  dlIcs('gyoji-'+CALS[ci].id+'.ics',buildIcs(list,+$('icsMode').value));
+  $('icsMsg').textContent='保存しました。ダウンロードしたファイルを開いて、カレンダーに追加してください。';
+};
 function go(n){m+=n;if(m<0){m=11;y--}if(m>11){m=0;y++}sel=null;render()}
 $('prev').onclick=()=>go(-1);$('next').onclick=()=>go(1);$('all').onclick=()=>{sel=null;render()};
 $('chips').onclick=e=>{const f=e.target.dataset.f;if(f){flt=f;render()}};
 $('grid').onclick=e=>{const b=e.target.closest('[data-d]');if(b){sel=sel===b.dataset.d?null:b.dataset.d;render()}};
-let admin=false,canEdit=false,art=null,editing=-1,armed=false,pmode='';
+let admin=false,editing=-1,armed=false,pmode='',dirty=false;
 const dlg=$('dlg'),pdlg=$('pdlg');
-try{const v=JSON.parse(sessionStorage.getItem('v'));if(v){y=v[0];m=v[1];sel=v[2]}}catch(e){}
 function openDlg(i){
   editing=i;armed=false;
   const e=i>=0?EVENTS[i]:{d:sel||key(1),t:'',time:'',place:'',cat:'event',note:''};
   $('f_d').value=e.d;$('f_t').value=e.t;$('f_time').value=e.time;$('f_place').value=e.place;$('f_cat').value=e.cat;$('f_note').value=e.note;
-  $('del').hidden=i<0;$('del').textContent='削除';$('dlgTitle').textContent=i<0?'予定を追加':'予定を編集';$('err').textContent='';
+  $('evInfo').textContent=(i>=0&&(e.cb||e.ub))?'作成: '+(e.cb||'記録なし')+(e.ca?'('+fmtT(e.ca)+')':'')+' / 最終更新: '+(e.ub||'記録なし')+(e.ua?'('+fmtT(e.ua)+')':''):'';
+  $('evHist').hidden=i<0;$('del').hidden=i<0;$('del').textContent='削除';$('dlgTitle').textContent=i<0?'予定を追加':'予定を編集';$('err').textContent='';
   dlg.showModal();
 }
-function buildDoc(){
-  const c=document.documentElement.cloneNode(true);
-  ['chips','grid','list','month','listTitle','msg','err','soon'].forEach(id=>{c.querySelector('#'+id).textContent=''});
-  ['adminbar','add','all','login','soon'].forEach(id=>{c.querySelector('#'+id).hidden=true});
-  c.querySelector('#dlg').removeAttribute('open');
-  const s=[...c.querySelectorAll('script')].find(x=>x.textContent.includes('const EVENTS='));
-  const json=JSON.stringify(EVENTS,null,1).replace(/</g,'\\u003c');
-  s.textContent=s.textContent.replace(/const EVENTS=\[[\s\S]*?\n\];/,()=>'const EVENTS='+json+';');
-  s.textContent=s.textContent.replace(/let PASS='[0-9a-f]*';/,()=>"let PASS='"+PASS+"';");
-  return '<!doctype html>\n'+c.outerHTML;
-}
-async function save(){
+
+
+function save(){
   EVENTS.sort((a,b)=>(a.d+a.time).localeCompare(b.d+b.time));
-  $('msg').textContent='保存しています…';
-  try{sessionStorage.setItem('v',JSON.stringify([y,m,sel]))}catch(e){}
-  try{await art.publish(buildDoc())}
-  catch(err){
-    const c=err&&err.code;
-    if(c==='not_writer'||c==='not_granted'||c==='not_declared'){admin=false;$('adminbar').hidden=true;render();$('msg').textContent='この画面からは編集できません。管理者の権限が必要です。'}
-    else if(c==='conflict'){$('msg').textContent='ほかの人が先に更新したため、最新の内容に切り替えます。'}
-    else{$('msg').textContent='保存できませんでした。もう一度お試しください。'}
-  }
+  dirty=true;render();
+  $('msg').textContent='変更しました。「更新したファイルを保存」を押すと、新しいファイルが保存されます。';
 }
 $('add').onclick=()=>openDlg(-1);
 $('list').addEventListener('click',e=>{const b=e.target.closest('.edit');if(b)openDlg(+b.dataset.i)});
@@ -258,56 +1007,244 @@ $('f').onsubmit=ev=>{
   ev.preventDefault();
   const o={d:$('f_d').value,t:$('f_t').value.trim(),time:$('f_time').value.trim(),place:$('f_place').value.trim(),cat:$('f_cat').value,note:$('f_note').value.trim()};
   if(!o.d||!o.t){$('err').textContent='日付とタイトルを入力してください。';return}
-  if(editing>=0)EVENTS[editing]=o;else EVENTS.push(o);
+  const nowIso=new Date().toISOString();
+  if(editing>=0){const old=EVENTS[editing];Object.assign(o,{id:old.id||newId(),cb:old.cb||'',ca:old.ca||'',ub:me||'',ua:nowIso});logAdd('予定を編集',CALS[ci].name+': '+evTxt(old)+' → '+evTxt(o),{cid:CALS[ci].id,eid:o.id});EVENTS[editing]=o}
+  else{Object.assign(o,{id:newId(),cb:me||'',ca:nowIso,ub:me||'',ua:nowIso});logAdd('予定を追加',CALS[ci].name+': '+evTxt(o),{cid:CALS[ci].id,eid:o.id});EVENTS.push(o)}
   dlg.close();save();
 };
 $('del').onclick=()=>{
   if(!armed){armed=true;$('del').textContent='もう一度押すと削除';return}
-  EVENTS.splice(editing,1);dlg.close();save();
+  logAdd('予定を削除',CALS[ci].name+': '+evTxt(EVENTS[editing]),{cid:CALS[ci].id,eid:EVENTS[editing].id});EVENTS.splice(editing,1);dlg.close();save();
 };
-async function hash(t){
-  const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('cal:'+t));
-  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+
+
+function sha256(str){
+  const K=[],H=[];
+  for(let p=2,n=0;n<64;p++){let q=true;for(let i=2;i*i<=p;i++)if(p%i===0){q=false;break}
+    if(q){if(n<8)H[n]=(Math.pow(p,.5)%1)*4294967296|0;K[n]=(Math.pow(p,1/3)%1)*4294967296|0;n++}}
+  const by=[],ms=unescape(encodeURIComponent(str));
+  for(let i=0;i<ms.length;i++)by.push(ms.charCodeAt(i));
+  const bits=by.length*8;by.push(128);while(by.length%64!==56)by.push(0);
+  for(let i=7;i>=0;i--)by.push(i>3?0:(bits>>>(i*8))&255);
+  let h=H.slice();const w=new Array(64);
+  for(let o=0;o<by.length;o+=64){
+    for(let i=0;i<16;i++)w[i]=(by[o+4*i]<<24)|(by[o+4*i+1]<<16)|(by[o+4*i+2]<<8)|by[o+4*i+3];
+    for(let i=16;i<64;i++){const a=w[i-15],b=w[i-2];
+      const s0=((a>>>7)|(a<<25))^((a>>>18)|(a<<14))^(a>>>3),s1=((b>>>17)|(b<<15))^((b>>>19)|(b<<13))^(b>>>10);
+      w[i]=(w[i-16]+s0+w[i-7]+s1)|0}
+    let [a,b,c,d,e,f,g,k]=h;
+    for(let i=0;i<64;i++){
+      const S1=((e>>>6)|(e<<26))^((e>>>11)|(e<<21))^((e>>>25)|(e<<7)),ch=(e&f)^(~e&g),t1=(k+S1+ch+K[i]+w[i])|0;
+      const S0=((a>>>2)|(a<<30))^((a>>>13)|(a<<19))^((a>>>22)|(a<<10)),mj=(a&b)^(a&c)^(b&c),t2=(S0+mj)|0;
+      k=g;g=f;f=e;e=(d+t1)|0;d=c;c=b;b=a;a=(t1+t2)|0}
+    h=[h[0]+a|0,h[1]+b|0,h[2]+c|0,h[3]+d|0,h[4]+e|0,h[5]+f|0,h[6]+g|0,h[7]+k|0];
+  }
+  return h.map(x=>(x>>>0).toString(16).padStart(8,'0')).join('');
 }
-function enter(){
-  admin=true;try{sessionStorage.setItem('em','1')}catch(e){}
-  $('adminbar').hidden=false;$('login').hidden=true;render();
+const hash=async t=>sha256('cal:'+t);
+let me=null;
+const ldlg=$('ldlg'),rdlg=$('rdlg');let restoreCb=null;
+function offerRestore(cb){
+  const dr=getDraft();
+  const same=dr&&Array.isArray(dr.CALS)&&JSON.stringify([dr.CALS,dr.ACCOUNTS||[],dr.LOG||[]])===JSON.stringify([CALS,ACCOUNTS,LOG]);
+  if(!dr||!Array.isArray(dr.CALS)||!dr.CALS.length||dr.t<=Date.parse(BUILT)||same){cb();return}
+  restoreCb=cb;
+  $('rMsg').textContent='この端末に、このファイルより新しい編集状態が残っています(最後の編集: '+fmtT(dr.t)+')。復元しますか?';
+  rdlg.showModal();
 }
+const acctHash=(n,p)=>sha256('cal:'+n+'|'+p);
+const fmtT=t=>{const d=new Date(t);return d.getFullYear()+'/'+pad(d.getMonth()+1)+'/'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())};
+function evTxt(e){return e.d+' '+e.t+(e.time?' '+e.time:'')+(e.place?' @'+e.place:'')+(e.note?' ['+e.note+']':'')+' ('+(CATS[e.cat]||e.cat)+')'}
+const DKEY='cal_draft_'+FID;
+function newId(){return 'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function ensureIds(){CALS.forEach(c=>(c.events||[]).forEach(e=>{if(!e.id)e.id=newId()}))}
+function getDraft(){try{return JSON.parse(localStorage.getItem(DKEY)||'null')}catch(e){return null}}
+function persist(){if(VIEWONLY)return;try{localStorage.setItem(DKEY,JSON.stringify({base:BUILT,t:Date.now(),CALS,ACCOUNTS,LOG}))}catch(e){}}
+function restore(){
+  if(VIEWONLY)return false;
+  try{
+    const d=JSON.parse(localStorage.getItem(DKEY)||'null');
+    if(d&&d.base===BUILT&&Array.isArray(d.CALS)&&d.CALS.length){
+      CALS.splice(0,CALS.length,...d.CALS);ACCOUNTS.splice(0,ACCOUNTS.length,...(d.ACCOUNTS||[]));LOG.splice(0,LOG.length,...(d.LOG||[]));
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+function logAdd(a,d,x){LOG.push(Object.assign({t:new Date().toISOString(),u:me||'',a,d:d||''},x||{}));if(LOG.length>2000)LOG.splice(0,LOG.length-2000);setTimeout(persist,0)}
+function enter(name){me=name;admin=true;$('adminbar').hidden=false;$('login').hidden=true;$('who').textContent='ログイン中: '+name;render()}
+function leave(){if(me)logAdd('ログアウト');me=null;admin=false;$('adminbar').hidden=true;$('login').hidden=false;$('who').textContent='';render()}
 function openP(mode){
-  pmode=mode;$('p_in').value='';$('pErr').textContent='';
-  $('pTitle').textContent=mode==='login'?'パスコードを入力':mode==='setup'?'パスコードを設定':'新しいパスコード';
-  $('pHelp').textContent=mode==='login'?'管理者に伝えられたパスコードを入力してください。':'管理者モードに入るときに使います。4文字以上で決めてください。';
+  pmode=mode;$('p_in').value='';$('p_name').value='';$('pErr').textContent='';
+  try{if(mode==='login')$('p_name').value=localStorage.getItem('cal_name')||''}catch(e){}
+  $('pTitle').textContent={setup:'最初の管理者を登録',login:'ログイン',add:'管理者を追加',change:'パスコードを変更'}[mode];
+  $('pHelp').textContent={setup:'お名前とパスコード(4文字以上)を決めてください。履歴には、このお名前が記録されます。',login:'お名前とパスコードを入力してください。',add:'追加する管理者のお名前と、パスコード(4文字以上)を決めてください。',change:'新しいパスコード(4文字以上)を入力してください。'}[mode];
+  $('p_namerow').style.display=mode==='change'?'none':'block';
   pdlg.showModal();
 }
-$('login').onclick=()=>openP(PASS?'login':'setup');
+$('login').onclick=()=>{const dr=getDraft();openP((ACCOUNTS.length||(dr&&dr.ACCOUNTS&&dr.ACCOUNTS.length))?'login':'setup')};
 $('chpass').onclick=()=>openP('change');
-$('logout').onclick=()=>{admin=false;try{sessionStorage.removeItem('em')}catch(e){}$('adminbar').hidden=true;$('login').hidden=false;render()};
+$('addAdmin').onclick=()=>openP('add');
+$('logout').onclick=leave;
 $('pCancel').onclick=()=>pdlg.close();
 $('pf').onsubmit=async ev=>{
   ev.preventDefault();
-  const v=$('p_in').value;
+  const n=$('p_name').value.trim(),v=$('p_in').value;
   try{
     if(pmode==='login'){
-      if(await hash(v)!==PASS){$('pErr').textContent='パスコードが違います。';return}
-      pdlg.close();enter();return;
+      const dr=getDraft(),h=acctHash(n,v);
+      const a=ACCOUNTS.find(x=>x.n===n&&x.h===h)||((dr&&dr.ACCOUNTS)||[]).find(x=>x.n===n&&x.h===h);
+      if(!a){$('pErr').textContent='お名前かパスコードが違います。';return}
+      pdlg.close();try{localStorage.setItem('cal_name',n)}catch(e){}enter(n);offerRestore(()=>logAdd('ログイン'));return;
     }
-    if(v.length<4){$('pErr').textContent='4文字以上で入力してください。';return}
-    PASS=await hash(v);pdlg.close();enter();save();
-  }catch(e){$('pErr').textContent='パスコードを確認できませんでした。もう一度お試しください。'}
+    if(v.length<4){$('pErr').textContent='パスコードは4文字以上にしてください。';return}
+    if(pmode==='change'){
+      ACCOUNTS.find(x=>x.n===me).h=acctHash(me,v);logAdd('パスコードを変更');dirty=true;pdlg.close();
+      $('msg').textContent='パスコードを変更しました。「更新したファイルを保存」を押すと、新しいファイルに反映されます。';return;
+    }
+    if(!n){$('pErr').textContent='お名前を入力してください。';return}
+    if(ACCOUNTS.some(x=>x.n===n)){$('pErr').textContent='同じお名前の管理者がいます。';return}
+    ACCOUNTS.push({n,h:acctHash(n,v)});dirty=true;pdlg.close();
+    if(pmode==='setup'){try{localStorage.setItem('cal_name',n)}catch(e){}enter(n);logAdd('最初の管理者を登録','登録名: '+n)}
+    else logAdd('管理者を追加','追加した名前: '+n);
+    $('msg').textContent='登録しました。「更新したファイルを保存」を押すと、新しいファイルに反映されます。';
+  }catch(e){$('pErr').textContent='登録できませんでした。もう一度お試しください。'}
 };
+let shownLog=[];
+function openLog(flt,title){
+  shownLog=flt?LOG.filter(flt):LOG.slice();
+  $('lTitle').textContent=title||'操作の履歴';
+  $('lNote').textContent=shownLog.length?'新しい順に表示しています。('+shownLog.length+'件) この履歴は、このブラウザに自動で保存されています。ファイルにも残すには「更新したファイルを保存」を押してください。':'まだ履歴がありません。';
+  $('logList').innerHTML=shownLog.slice().reverse().map(x=>'<div class="logrow"><div class="meta">'+fmtT(x.t)+' ・ '+esc(x.u||'(不明)')+'</div><div><b>'+esc(x.a)+'</b> '+esc(x.d)+'</div></div>').join('');
+  ldlg.showModal();
+}
+$('rYes').onclick=()=>{
+  const dr=getDraft();
+  if(dr){
+    CALS.splice(0,CALS.length,...dr.CALS);ACCOUNTS.splice(0,ACCOUNTS.length,...(dr.ACCOUNTS||[]));LOG.splice(0,LOG.length,...(dr.LOG||[]));
+    ci=0;EVENTS=CALS[0].events;sel=null;ensureIds();
+    logAdd('編集状態を復元','端末に残っていた最新の状態を復元しました(最後の編集: '+fmtT(dr.t)+')');
+    $('msg').textContent='端末に残っていた最新の編集状態を復元しました。';
+  }
+  rdlg.close();dirty=true;const f=restoreCb;restoreCb=null;if(f)f();render();
+};
+$('rNo').onclick=()=>{rdlg.close();const f=restoreCb;restoreCb=null;if(f)f()};
+$('logBtn').onclick=()=>openLog();
+$('calHist').onclick=()=>openLog(x=>x.cid===CALS[ci].id,'「'+CALS[ci].name+'」の履歴');
+$('evHist').onclick=()=>{const e=EVENTS[editing];if(e)openLog(x=>x.eid===e.id&&x.cid===CALS[ci].id,'この予定の編集履歴')};
+$('lClose').onclick=()=>ldlg.close();
+$('lCsv').onclick=()=>{
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const rows=[['日時','名前','操作','予定表','内容']].concat(shownLog.map(x=>[fmtT(x.t),x.u,x.a,(CALS.find(c=>c.id===x.cid)||{}).name||'',x.d]));
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+rows.map(r=>r.map(q).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));
+  a.download='gyoji-history.csv';document.body.appendChild(a);a.click();a.remove();
+};
+$('dl').onclick=()=>{
+  logAdd('更新したファイルを保存');
+  dlHtml('gyoji-calendar.html',makeDoc(CALS,'master'));
+  dirty=false;$('msg').textContent='保存しました。保存したファイルをメンバーに配り直してください。';
+};
+const cdlg=$('cdlg');let cmode='new',calArmed=false;
+function renderCals(){
+  if(VIEWONLY){$('cals').innerHTML='';const t='行事カレンダー('+CALS[ci].name+')';$('ttl').textContent=t;document.title=t;return}
+  $('cals').innerHTML=CALS.map((c,i)=>'<button class="chip" data-ci="'+i+'" aria-pressed="'+(i===ci)+'">'+esc(c.name)+'</button>').join('')+(admin?'<button class="chip" id="calNew">＋新規作成</button>':'');
+}
+function selectCal(i){
+  ci=i;EVENTS=CALS[i].events;sel=null;flt='all';calArmed=false;$('calDel').textContent='この予定表を削除';
+  try{localStorage.setItem('cal_cur',CALS[i].id)}catch(e){}
+  render();
+}
+function openC(mode){
+  cmode=mode;$('cErr').textContent='';
+  $('cTitle').textContent=mode==='new'?'予定表を新規作成':'予定表の名前を変更';
+  $('c_name').value=mode==='new'?'':CALS[ci].name;
+  $('c_copyrow').style.display=mode==='new'?'block':'none';$('c_copy').checked=false;
+  cdlg.showModal();
+}
+$('cals').onclick=e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.id==='calNew'){openC('new');return}
+  if(b.dataset.ci!==undefined)selectCal(+b.dataset.ci);
+};
+$('calRename').onclick=()=>openC('rename');
+$('cCancel').onclick=()=>cdlg.close();
+$('cf').onsubmit=ev=>{
+  ev.preventDefault();
+  const name=$('c_name').value.trim();
+  if(!name){$('cErr').textContent='名前を入力してください。';return}
+  if(CALS.some((c,i)=>c.name===name&&!(cmode==='rename'&&i===ci))){$('cErr').textContent='同じ名前の予定表があります。';return}
+  if(cmode==='new'){
+    logAdd('予定表を新規作成',name+($('c_copy').checked?'(いまの予定表をコピー)':''));CALS.push({id:'c'+Date.now().toString(36),name,events:$('c_copy').checked?JSON.parse(JSON.stringify(EVENTS)).map(e=>Object.assign(e,{id:newId(),cb:me||'',ca:new Date().toISOString(),ub:me||'',ua:new Date().toISOString()})):[],by:me||'',at:new Date().toISOString()});
+    LOG[LOG.length-1].cid=CALS[CALS.length-1].id;cdlg.close();selectCal(CALS.length-1);
+  }else{logAdd('予定表の名前を変更',CALS[ci].name+' → '+name,{cid:CALS[ci].id});CALS[ci].name=name;cdlg.close();render()}
+  dirty=true;$('msg').textContent='変更しました。「更新したファイルを保存」を押すと、新しいファイルが保存されます。';
+};
+$('calDel').onclick=()=>{
+  if(CALS.length<2){$('msg').textContent='予定表が1つのときは削除できません。';return}
+  if(!calArmed){calArmed=true;$('calDel').textContent='もう一度押すと「'+CALS[ci].name+'」を削除';return}
+  logAdd('予定表を削除',CALS[ci].name,{cid:CALS[ci].id});CALS.splice(ci,1);selectCal(Math.min(ci,CALS.length-1));
+  dirty=true;$('msg').textContent='予定表を削除しました。「更新したファイルを保存」を押すと、新しいファイルが保存されます。';
+};
+{
+  const before=JSON.stringify([CALS,ACCOUNTS,LOG]);
+  if(restore()&&JSON.stringify([CALS,ACCOUNTS,LOG])!==before){
+    ci=0;EVENTS=CALS[0].events;dirty=true;
+    $('msg').textContent='前回、ファイルに保存していなかった変更が残っていたので、復元しました。';
+  }
+}
+ensureIds();
+try{const k=localStorage.getItem('cal_cur'),i=CALS.findIndex(c=>c.id===k);if(i>0){ci=i;EVENTS=CALS[i].events}}catch(e){}
+function makeDoc(cals,mode){
+  const c=document.documentElement.cloneNode(true);
+  ['chips','grid','list','month','listTitle','msg','pTitle','pHelp','pErr','err','soon','cals','cErr','who','logList','lNote','calInfo','evInfo','dlgTitle','cTitle','rMsg'].forEach(id=>{const n=c.querySelector('#'+id);if(n)n.textContent=''});
+  ['adminbar','add','all','soon','savebar'].forEach(id=>{const n=c.querySelector('#'+id);if(n)n.hidden=true});
+  c.querySelector('body').classList.remove('saving');
+  c.querySelector('#del').textContent='削除';c.querySelector('#calDel').textContent='この予定表を削除';
+  ['dlg','pdlg','cdlg','ldlg','rdlg'].forEach(id=>c.querySelector('#'+id).removeAttribute('open'));
+  const s=[...c.querySelectorAll('script')].find(x=>x.textContent.includes('const CALS='));
+  const j=x=>JSON.stringify(x,null,1).replace(/</g,'\\u003c'),keep=mode==='master';
+  const cl=keep?cals:cals.map(c=>({id:c.id,name:c.name,events:c.events.map(e=>{const r=Object.assign({},e);delete r.cb;delete r.ca;delete r.ub;delete r.ua;return r})}));
+  s.textContent=s.textContent
+    .replace(/const CALS=(?:\[\]|\[[\s\S]*?\n\]);/,()=>'const CALS='+j(cl)+';')
+    .replace(/let ACCOUNTS=(?:\[\]|\[[\s\S]*?\n\]);/,()=>'let ACCOUNTS='+j(keep?ACCOUNTS:[])+';')
+    .replace(/let LOG=(?:\[\]|\[[\s\S]*?\n\]);/,()=>'let LOG='+j(keep?LOG:[])+';')
+    .replace(/const VIEWONLY=(?:true|false);/,()=>'const VIEWONLY='+(mode==='view')+';')
+    .replace(/const FID='[^']*';/,()=>"const FID='"+(keep?FID:'f_'+Math.random().toString(36).slice(2,10))+"';")
+    .replace(/const BUILT='[^']*';/,()=>"const BUILT='"+new Date().toISOString()+"';");
+  return '<!doctype html>\n'+c.outerHTML;
+}
+function dlHtml(name,html){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download=name;document.body.appendChild(a);a.click();a.remove();
+}
+function expCal(i){
+  const edit=$('expMode').value==='edit';
+  const name='calendar-'+(i+1)+(edit?'-edit':'')+'.html';
+  logAdd('配布用ファイルを書き出し',CALS[i].name+'('+(edit?'管理者モード付き':'閲覧専用')+')',{cid:CALS[i].id});
+  dlHtml(name,makeDoc([CALS[i]],edit?'edit':'view'));
+  return '「'+CALS[i].name+'」を '+name+' として保存しました。'+(edit?'先生など管理者用です。開いて「管理者モード」を押し、最初にパスコードを決めてから使います。':'このファイルをその予定表の人たちに配ってください。');
+}
+$('expOne').onclick=()=>{$('msg').textContent=expCal(ci)};
+$('expAll').onclick=()=>{
+  $('msg').textContent=CALS.length+'個のファイルを保存します。ブラウザに複数のダウンロードの許可を求められたら、許可してください。ファイルの番号は、予定表の並び順です。';
+  CALS.forEach((c,i)=>setTimeout(()=>expCal(i),i*600));
+};
+function updateInfo(){const c=CALS[ci];$('calInfo').textContent=admin?('予定表「'+c.name+'」: '+(c.by?'作成者 '+c.by+(c.at?'('+fmtT(c.at)+')':''):'作成者の記録なし')):''}
+function updateSaveBar(){const on=admin&&dirty;$('savebar').hidden=!on;document.body.classList.toggle('saving',on)}
+$('saveBtn').onclick=()=>$('dl').click();
+setInterval(updateSaveBar,400);
 render();
-(async()=>{
-  try{
-    if(typeof claude==='undefined')return;
-    art=await claude.use('artifact');
-    const u=await claude.use('user');
-    canEdit=!!(art&&u&&u.canEdit&&u.canEdit());
-  }catch(e){canEdit=false}
-  let em=false;try{em=sessionStorage.getItem('em')==='1'}catch(e){}
-  admin=canEdit&&em&&!!PASS;
-  $('adminbar').hidden=!admin;$('login').hidden=!canEdit||admin;render();
-})();
+$('login').hidden=VIEWONLY;
+
+// フォームの送信が使えない画面(プレビューなど)でも「決定」「保存」が押せるように、ボタンから直接処理を呼びます
+[['f','fOk'],['cf','cOk'],['pf','pOk']].forEach(([f,b])=>{
+  const form=document.getElementById(f),btn=document.getElementById(b);
+  if(!form||!btn)return;
+  btn.onclick=()=>{if(form.onsubmit)form.onsubmit({preventDefault(){}})};
+  form.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName!=='TEXTAREA'&&e.target.tagName!=='BUTTON'){e.preventDefault();btn.click()}});
+});
 </script>
-
-
-</body></html>
+</body>
+</html>
